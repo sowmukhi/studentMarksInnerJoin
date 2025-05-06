@@ -3,7 +3,10 @@ package com.neoteric.dao;
 import com.neoteric.model.Marks;
 import com.neoteric.model.Student;
 import com.neoteric.model.StudentMark;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -11,10 +14,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class StudentMarkDAO {
-    private final String url = "jdbc:mysql://localhost:3306/studentjoin";
-    private final String user = "root";
-    private final String password = "Sow@5555";
+    @Autowired
+    private DataSource dataSource;
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
 
     public List<StudentMark> getAllStudentMarks() throws Exception {
         List<StudentMark> list = new ArrayList<>();
@@ -22,9 +30,7 @@ public class StudentMarkDAO {
         String sql = "SELECT s.stu_id, s.stu_name, s.class, m.subject, m.marks " +
                 "FROM Student s INNER JOIN Marks m ON s.stu_id = m.stu_id";
 
-        Class.forName("com.mysql.cj.jdbc.Driver");
-
-        try (Connection conn = DriverManager.getConnection(url, user, password);
+        try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -41,8 +47,7 @@ public class StudentMarkDAO {
                         rs.getInt("marks")
                 );
 
-                StudentMark studentMark = new StudentMark(student, marks);
-                list.add(studentMark);
+                list.add(new StudentMark(student, marks));
             }
         }
 

@@ -7,6 +7,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,6 +16,15 @@ import java.util.List;
 
 
 public class StudentMarkServlet extends HttpServlet {
+    private StudentMarkDAO dao;
+
+    @Override
+    public void init() {
+        WebApplicationContext context = WebApplicationContextUtils
+                .getRequiredWebApplicationContext(getServletContext());
+        dao = context.getBean(StudentMarkDAO.class);
+    }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -21,7 +32,6 @@ public class StudentMarkServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         try {
-            StudentMarkDAO dao = new StudentMarkDAO();
             List<StudentMark> studentMarks = dao.getAllStudentMarks();
 
             out.println("<html><body><h2>Student Marks</h2>");
@@ -39,10 +49,8 @@ public class StudentMarkServlet extends HttpServlet {
             }
 
             out.println("</table></body></html>");
-
         } catch (Exception e) {
             out.println("<p>Error: " + e.getMessage() + "</p>");
         }
     }
-
 }
